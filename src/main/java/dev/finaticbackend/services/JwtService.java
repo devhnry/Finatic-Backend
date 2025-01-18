@@ -1,6 +1,7 @@
 package dev.finaticbackend.services;
 
 import dev.finaticbackend.entities.BaseUser;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.function.Function;
 
 @Service
 @Slf4j
 public class JwtService {
     private static final long Expiration_Time = 86_400; // 24hrs in Seconds
-    private SecretKey secretKey;
+    private final SecretKey secretKey;
 
     public JwtService() {
         String secretString = "HASDGHFJKODJGNKCJOQ&IRU123HKNCS890SDCSLNLMS7654MLJJHNAMFLJNONAXM&KNCKXCDJA";
@@ -60,4 +62,11 @@ public class JwtService {
                 .compact();
     }
 
+    public <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) {
+        return claimsTFunction.apply(Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload());
+    }
+
+    public String extractUsername(String token) {
+        return extractClaims(token, Claims::getSubject);
+    }
 }
