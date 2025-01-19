@@ -3,6 +3,12 @@ package dev.finaticbackend.entities;
 import dev.finaticbackend.enums.UserType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -10,7 +16,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Entity
-public class BaseUser {
+public class BaseUser implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -46,4 +52,14 @@ public class BaseUser {
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Account accountDetails;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        return emailAddress;
+    }
 }
